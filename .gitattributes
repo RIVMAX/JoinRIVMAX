@@ -1,2 +1,199 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RIVMAX Customer Form</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #0a0a0a;
+  color: white;
+  margin: 0;
+  padding: 20px;
+}
+.container {
+  max-width: 420px;
+  margin: auto;
+  padding: 20px;
+  background: #111;
+  border-radius: 12px;
+  box-shadow: 0px 0px 12px #000;
+}
+.logo {
+  width: 50px;
+  margin: auto;
+}
+.logo img {
+  width: 100%;
+  border-radius: 8px;
+}
+h2 { text-align: center; }
+label { display: block; margin: 10px 0 5px; font-size: 14px; }
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #1a1a1a;
+  color: white;
+  font-size: 15px;
+}
+
+button {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  background: red;
+  color: white;
+  border-radius: 8px;
+  font-size: 18px;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+#thankBox {
+  display: none;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.codeBox {
+  font-size: 32px;
+  font-weight: bold;
+  color: red;
+}
+
+#error {
+  color: #ff6b6b;
+  margin-top: 10px;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="formBox">
+  
+  <div class="logo">
+    <img src="c:\Users\sarvj\Music\ONLY BRAND THING\Screenshot 2025-11-16 023258.png" alt="RIVMAX Logo">
+  </div>
+
+  <h2>Join RIVMAX Family</h2>
+
+  <label>Name (optional)</label>
+  <input type="text" id="name">
+
+  <label>Email (required)</label>
+  <input type="email" id="email">
+
+  <label>Mobile Number (optional)</label>
+  <input type="text" id="mobile">
+
+  <label>Birthday Month (optional)</label>
+  <select id="birthday">
+    <option value="">Select Month</option>
+    <option>January</option><option>February</option><option>March</option>
+    <option>April</option><option>May</option><option>June</option>
+    <option>July</option><option>August</option><option>September</option>
+    <option>October</option><option>November</option><option>December</option>
+  </select>
+
+  <label>
+    <input type="checkbox" id="agree"> I agree to receive offers & updates.
+  </label>
+
+  <button onclick="submitForm()">Submit</button>
+
+  <p id="error"></p>
+</div>
+
+<div class="container" id="thankBox">
+  <h2>🎉 Thank you!</h2>
+  <p>Your discount code is:</p>
+  <div class="codeBox" id="discountCode"></div>
+  <p>Use this code on your next purchase.</p>
+</div>
+
+<script>
+// =====================
+// Duplicate Protection
+// =====================
+let usedEmails = JSON.parse(localStorage.getItem("emails") || "[]");
+let usedMobiles = JSON.parse(localStorage.getItem("mobiles") || "[]");
+
+// =====================
+// Save Data Locally
+// =====================
+function downloadData(name, email, mobile, birthday, code) {
+    let csvLine = `${name},${email},${mobile},${birthday},${code}\n`;
+
+    let blob = new Blob([csvLine], { type: 'text/plain' });
+    let url = URL.createObjectURL(blob);
+    
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = "rivmax_customers.txt";
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+// =====================
+// Main Submit Function
+// =====================
+function submitForm() {
+  let name = document.getElementById("name").value.trim();
+  let email = document.getElementById("email").value.trim().toLowerCase();
+  let mobile = document.getElementById("mobile").value.trim();
+  let birthday = document.getElementById("birthday").value;
+  let agree = document.getElementById("agree").checked;
+  let error = document.getElementById("error");
+
+  error.innerText = "";
+
+  if (!email) {
+    error.innerText = "Email is required.";
+    return;
+  }
+  if (!agree) {
+    error.innerText = "Please agree to receive offers.";
+    return;
+  }
+  if (usedEmails.includes(email)) {
+    error.innerText = "This email is already used.";
+    return;
+  }
+  if (mobile && usedMobiles.includes(mobile)) {
+    error.innerText = "This mobile is already used.";
+    return;
+  }
+
+  // Save for duplicate protection
+  usedEmails.push(email);
+  usedMobiles.push(mobile);
+  localStorage.setItem("emails", JSON.stringify(usedEmails));
+  localStorage.setItem("mobiles", JSON.stringify(usedMobiles));
+
+  // Random Discount Code
+  const codes = ["RIVMAX5", "RIVMAX10", "RIVMAX15"];
+  let randomCode = codes[Math.floor(Math.random() * codes.length)];
+
+  document.getElementById("discountCode").innerText = randomCode;
+
+  // Save Data to Local File
+  downloadData(name, email, mobile, birthday, randomCode);
+
+  // Show Thank You Screen
+  document.getElementById("formBox").style.display = "none";
+  document.getElementById("thankBox").style.display = "block";
+}
+</script>
+
+</body>
+</html>
